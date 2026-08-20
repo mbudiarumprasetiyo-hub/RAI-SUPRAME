@@ -12,7 +12,7 @@
 
 <div id="boot" class="boot">
   <div class="boot-ring">
-    <div class="boot-logo">R</div>
+    <div class="boot-logo"><img src="assets/rai-logo.png" alt="RAI"></div>
   </div>
   <div class="boot-title">RAI SUPRAME</div>
   <div class="boot-sub">REPUBLIK OF AI // NEURAL CORE</div>
@@ -45,7 +45,9 @@
     <div class="logo-emblem">
       <div class="logo-ring lr1"></div>
       <div class="logo-ring lr2"></div>
-      <div class="logo-letter">R</div>
+      <div class="logo-letter">
+        <img src="assets/rai-logo.png" alt="RAI">
+      </div>
     </div>
 
     <div class="rai-wordmark">RAI</div>
@@ -100,7 +102,7 @@
   <div class="brand">
 
     <div class="brand-icon">
-      <span>R</span>
+      <img src="assets/rai-logo.png" alt="RAI">
       <i></i>
     </div>
 
@@ -109,6 +111,39 @@
       <small>REPUBLIK OF AI</small>
     </div>
 
+  </div>
+
+
+  <button id="musicButton" class="music-button" type="button" title="RAI MUSIC">♪</button>
+
+  <div id="musicPanel" class="music-panel hidden">
+    <div class="music-header">
+      <div>
+        <strong>RAI MUSIC</strong>
+        <small>PERSONAL AUDIO CORE</small>
+      </div>
+      <button id="musicClose" type="button">×</button>
+    </div>
+
+    <div id="musicSlots" class="music-slots"></div>
+
+    <label class="music-add">
+      <span>＋ ADD MUSIC</span>
+      <input id="musicInput" type="file" accept="audio/*" multiple hidden>
+    </label>
+
+    <div class="music-controls">
+      <button id="musicPrev" type="button">‹</button>
+      <button id="musicPlay" type="button">▶</button>
+      <button id="musicNext" type="button">›</button>
+
+      <div class="music-volume">
+        <span>VOL</span>
+        <input id="musicVolume" type="range" min="0" max="1" step="0.01" value="0.2">
+      </div>
+    </div>
+
+    <audio id="raiAudio" preload="metadata"></audio>
   </div>
 
   <div class="online">
@@ -143,6 +178,25 @@
       Neural command environment ready.
     </p>
 
+    <div class="rai-system-status">
+
+      <div class="system-stat">
+        <span class="system-icon">🔋</span>
+        <span id="batteryStatus">--%</span>
+      </div>
+
+      <div class="system-stat">
+        <span class="system-icon">🌡️</span>
+        <span id="temperatureStatus">--°C</span>
+      </div>
+
+      <div class="system-stat">
+        <span class="system-icon">📶</span>
+        <span id="networkStatus">CHECKING...</span>
+      </div>
+
+    </div>
+
     <div class="hero-actions">
       <button class="primary" data-open="chat">
         START CHAT <b>→</b>
@@ -162,24 +216,33 @@
   </div>
 
 
-  <div class="orb">
+  <div class="neural-visual">
+    <div class="data-frame">
+      <div class="frame-line fl1"></div>
+      <div class="frame-line fl2"></div>
 
-    <div class="orb-halo"></div>
-    <div class="orb-energy"></div>
+      <div class="data-title">NEURAL LINK</div>
 
-    <div class="orb-data d1">01001</div>
-    <div class="orb-data d2">RAI//03</div>
-    <div class="orb-data d3">AI CORE</div>
-
-    <div class="orbit o1"></div>
-    <div class="orbit o2"></div>
-    <div class="orbit o3"></div>
-    <div class="orbit o4"></div>
-
-    <div class="orb-core">
-      <div class="core-inner">
-        <span>R</span>
+      <div class="data-core">
+        <img src="assets/rai-logo.png" alt="RAI">
       </div>
+
+      <div class="data-line dl1"></div>
+      <div class="data-line dl2"></div>
+      <div class="data-line dl3"></div>
+
+      <span class="data-bit b1">01001</span>
+      <span class="data-bit b2">11010</span>
+      <span class="data-bit b3">RAI//03</span>
+      <span class="data-bit b4">ONLINE</span>
+    </div>
+
+    <div class="scan-column"></div>
+    <div class="neural-particle np1"></div>
+    <div class="neural-particle np2"></div>
+    <div class="neural-particle np3"></div>
+    <div class="neural-particle np4"></div>
+  </div>
     </div>
 
   </div>
@@ -236,21 +299,14 @@
     <b class="feature-arrow">↗</b>
   </article>
 
-  <article class="feature" data-open="send">
-    <div class="feature-number">02</div>
-    <div class="feature-icon">⌁</div>
-    <small>COMMUNICATION</small>
-    <h4>RAI SEND</h4>
-    <p>Prepare WhatsApp messages instantly.</p>
-    <b class="feature-arrow">↗</b>
-  </article>
+  
 
-  <article class="feature" data-open="voice">
+  <article class="feature" data-open="analyzer">
     <div class="feature-number">03</div>
     <div class="feature-icon">◌</div>
-    <small>VOICE</small>
-    <h4>RAI VOICE</h4>
-    <p>Speak naturally with browser voice recognition.</p>
+    <small>DIAGNOSTIC</small>
+    <h4>RAI ANALYZER</h4>
+    <p>Analyze code, errors, logs, text, and technical problems.</p>
     <b class="feature-arrow">↗</b>
   </article>
 
@@ -394,6 +450,42 @@ setTimeout(function () {
 </script>
 
 <script src="script.js"></script>
+
+
+<!-- RAI ACCESS TRANSITION -->
+<div id="raiAccess" class="rai-access" aria-hidden="true">
+  <div class="access-grid"></div>
+
+  <div class="access-content">
+
+    <div class="access-logo">
+      <div class="access-logo-line"></div>
+      <img src="assets/rai-logo.png" alt="RAI">
+      <div class="access-logo-line"></div>
+    </div>
+
+    <div class="access-system">
+      RAI SUPRAME // SECURE SYSTEM
+    </div>
+
+    <div id="accessMessage" class="access-message">
+      MEMBUKA AKSES<span class="access-dots">...</span>
+    </div>
+
+    <div class="access-progress">
+      <span id="accessProgress"></span>
+    </div>
+
+    <div id="accessStatus" class="access-status">
+      AUTHENTICATING NEURAL CONNECTION
+    </div>
+
+    <div id="accessWelcome" class="access-welcome">
+      WELCOME TO RAI
+    </div>
+
+  </div>
+</div>
 
 </body>
 </html>

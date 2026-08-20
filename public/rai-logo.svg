@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 220">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset=".35" stop-color="#00ff88"/>
+      <stop offset=".75" stop-color="#00d9ff"/>
+      <stop offset="1" stop-color="#007cff"/>
+    </linearGradient>
+
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="600" height="220" fill="transparent"/>
+
+  <g filter="url(#glow)">
+    <path
+      d="M70 165 L105 55 L155 55 L190 165
+         M90 125 L170 125"
+      fill="none"
+      stroke="url(#g)"
+      stroke-width="16"
+      stroke-linecap="square"/>
+
+    <path
+      d="M235 55 H315
+         Q345 55 345 88
+         Q345 118 315 118
+         H235
+         M275 118 L350 165"
+      fill="none"
+      stroke="url(#g)"
+      stroke-width="16"
+      stroke-linecap="square"/>
+
+    <circle
+      cx="430"
+      cy="110"
+      r="55"
+      fill="none"
+      stroke="url(#g)"
+      stroke-width="5"/>
+
+    <circle
+      cx="430"
+      cy="110"
+      r="12"
+      fill="#00ff88"/>
+
+    <path
+      d="M430 35 V15
+         M430 185 V205
+         M355 110 H335
+         M505 110 H525"
+      stroke="#00d9ff"
+      stroke-width="5"/>
+  </g>
+
+  <text
+    x="300"
+    y="205"
+    text-anchor="middle"
+    font-family="monospace"
+    font-size="15"
+    letter-spacing="8"
+    fill="#7affc4">
+    REPUBLIK OF AI // SUPRAME
+  </text>
+</svg>

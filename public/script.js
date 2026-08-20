@@ -20,16 +20,93 @@ const themes = {
 ========================================= */
 
 window.addEventListener("load", () => {
-  // Boot harus selalu selesai walaupun modul lain error
+  startRAIBoot();
+});
+
+
+/* =========================================
+   RAI SUPRAME // CINEMATIC BOOT V2
+========================================= */
+
+function startRAIBoot() {
+  const boot = document.getElementById("boot");
+  const bootText = document.getElementById("bootText");
+  const progress = document.querySelector(".boot-progress span");
+
+  if (!boot) return;
+
+  const stages = [
+    [8,  "INITIALIZING NEURAL CORE..."],
+    [22, "SCANNING AI ARCHITECTURE..."],
+    [38, "LOADING SUPRAME ENGINE..."],
+    [55, "ESTABLISHING NEURAL LINK..."],
+    [72, "CALIBRATING RESPONSE MATRIX..."],
+    [88, "SECURITY PROTOCOLS ONLINE..."],
+    [100, "SYSTEM READY"]
+  ];
+
+  let i = 0;
+
+  boot.classList.remove("hide");
+  boot.style.display = "grid";
+  boot.style.visibility = "visible";
+  boot.style.opacity = "1";
+
+  if (progress) progress.style.width = "0%";
+
+  function nextStage() {
+    if (i >= stages.length) {
+      setTimeout(finishRAIBoot, 550);
+      return;
+    }
+
+    const [percent, text] = stages[i++];
+
+    if (bootText) {
+      bootText.textContent = text;
+      bootText.classList.remove("boot-text-pulse");
+      void bootText.offsetWidth;
+      bootText.classList.add("boot-text-pulse");
+    }
+
+    if (progress) {
+      progress.style.width = percent + "%";
+    }
+
+    setTimeout(nextStage, percent === 100 ? 420 : 300);
+  }
+
+  nextStage();
+
+  // Safety fallback
+  setTimeout(finishRAIBoot, 5200);
+}
+
+
+function finishRAIBoot() {
+  const boot = document.getElementById("boot");
+
+  if (!boot || boot.dataset.finished === "1") return;
+
+  boot.dataset.finished = "1";
+
+  const bootText = document.getElementById("bootText");
+
+  if (bootText) {
+    bootText.textContent = "SYSTEM READY // RAI ONLINE";
+  }
+
+  boot.classList.add("hide");
+
   setTimeout(() => {
-    const boot = document.getElementById("boot");
+    boot.style.display = "none";
 
-    if (boot) {
-      boot.classList.add("hide");
+    const login = document.getElementById("loginScreen");
 
-      setTimeout(() => {
-        boot.style.display = "none";
-      }, 900);
+    if (login) {
+      login.style.display = "grid";
+      login.style.visibility = "visible";
+      login.style.opacity = "1";
     }
 
     try {
@@ -43,8 +120,8 @@ window.addEventListener("load", () => {
     } catch (e) {
       console.warn("Session error:", e);
     }
-  }, 1800);
-});
+  }, 900);
+}
 
 
 /* =========================================
@@ -176,6 +253,82 @@ async function typeAIResponse(element, text) {
 }
 
 
+
+/* =========================================
+   RAI ACCESS TRANSITION
+========================================= */
+
+async function openRAIAccess() {
+
+  const gate = $("raiAccess");
+  const message = $("accessMessage");
+  const status = $("accessStatus");
+  const progress = $("accessProgress");
+
+  if (!gate) return;
+
+  gate.classList.add("active");
+  gate.classList.remove("opened");
+  gate.setAttribute("aria-hidden", "false");
+
+  if (progress) progress.style.width = "0%";
+
+  if (message) {
+    message.innerHTML =
+      'MEMBUKA AKSES<span class="access-dots">...</span>';
+  }
+
+  if (status) {
+    status.textContent = "INITIALIZING RAI ACCESS";
+  }
+
+  await sleep(500);
+
+  if (progress) progress.style.width = "20%";
+  if (status) status.textContent = "VERIFYING IDENTITY";
+
+  await sleep(700);
+
+  if (progress) progress.style.width = "40%";
+  if (status) status.textContent = "ESTABLISHING NEURAL LINK";
+
+  await sleep(700);
+
+  if (progress) progress.style.width = "60%";
+  if (status) status.textContent = "LOADING RAI SUPRAME";
+
+  await sleep(700);
+
+  if (progress) progress.style.width = "80%";
+  if (status) status.textContent = "ACCESS PROTOCOL VERIFIED";
+
+  await sleep(700);
+
+  if (progress) progress.style.width = "100%";
+
+  if (message) {
+    message.textContent = "AKSES TERBUKA";
+  }
+
+  if (status) {
+    status.textContent = "RAI SUPRAME // SYSTEM ONLINE";
+  }
+
+  gate.classList.add("opened");
+
+  await sleep(500);
+
+  if (message) {
+    message.textContent = "WELCOME TO RAI";
+  }
+
+  await sleep(500);
+
+  gate.classList.remove("active");
+  gate.setAttribute("aria-hidden", "true");
+}
+
+
 /* =========================================
    LOGIN
 ========================================= */
@@ -220,6 +373,8 @@ $("loginForm")?.addEventListener(
         "ACCESS GRANTED";
 
       await sleep(350);
+
+      await openRAIAccess();
 
       showApp(
         $("username").value
@@ -276,7 +431,7 @@ function openFeature(name) {
   const features = {
     chat: openChat,
     send: openSend,
-    voice: openVoice,
+    analyzer: openAnalyzer,
     code: openCode,
     file: openFile,
     search: openSearch,
@@ -397,8 +552,7 @@ async function sendChat() {
 
   if (!input || !box) return;
 
-  const message =
-    input.value.trim();
+  const message = input.value.trim();
 
   if (!message) return;
 
@@ -411,8 +565,7 @@ async function sendChat() {
     "user-message"
   );
 
-  const thinking =
-    document.createElement("div");
+  const thinking = document.createElement("div");
 
   thinking.className =
     "rai-message thinking";
@@ -422,8 +575,7 @@ async function sendChat() {
 
   box.appendChild(thinking);
 
-  box.scrollTop =
-    box.scrollHeight;
+  box.scrollTop = box.scrollHeight;
 
   try {
 
@@ -442,12 +594,12 @@ async function sendChat() {
       }
     );
 
-    const data =
-      await res.json();
-
-    thinking.remove();
-
     if (!res.ok) {
+
+      const data =
+        await res.json().catch(() => ({}));
+
+      thinking.remove();
 
       appendChat(
         box,
@@ -459,11 +611,11 @@ async function sendChat() {
       return;
     }
 
-    /*
-      Buat bubble RAI kosong.
-      Setelah itu jawaban diketik
-      huruf demi huruf.
-    */
+    if (!res.body) {
+      throw new Error("STREAM TIDAK TERSEDIA");
+    }
+
+    thinking.remove();
 
     const reply =
       document.createElement("div");
@@ -478,19 +630,94 @@ async function sendChat() {
       document.createElement("span");
 
     reply.appendChild(text);
-
     box.appendChild(reply);
 
-    await typeAIResponse(
-      text,
-      data.reply || "No response"
-    );
+    const reader =
+      res.body.getReader();
+
+    const decoder =
+      new TextDecoder();
+
+    let buffer = "";
+    let fullReply = "";
+    let model = "GEMINI";
+
+    while (true) {
+
+      const { value, done } =
+        await reader.read();
+
+      if (done) break;
+
+      buffer += decoder.decode(
+        value,
+        { stream: true }
+      );
+
+      const lines =
+        buffer.split("\n");
+
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+
+        if (!line.trim()) continue;
+
+        try {
+
+          const data =
+            JSON.parse(line);
+
+          if (data.type === "text") {
+
+            fullReply += data.text;
+
+            text.textContent =
+              fullReply;
+
+            box.scrollTop =
+              box.scrollHeight;
+          }
+
+          if (data.type === "done") {
+            model =
+              data.model || model;
+          }
+
+          if (data.type === "error") {
+            throw new Error(
+              data.error || "STREAM ERROR"
+            );
+          }
+
+        } catch (e) {
+
+          if (
+            e instanceof SyntaxError
+          ) {
+            continue;
+          }
+
+          throw e;
+        }
+      }
+    }
+
+    if (!fullReply.trim()) {
+      text.textContent =
+        "RAI menerima respons kosong.";
+    }
 
     addTerminal(
-      `AI response received / ${data.model || "GEMINI"}`
+      `AI response received / ${model}`
     );
 
-  } catch {
+  } catch (error) {
+
+    console.error(
+      "RAI CHAT:",
+      error
+    );
 
     thinking.remove();
 
@@ -505,7 +732,6 @@ async function sendChat() {
   box.scrollTop =
     box.scrollHeight;
 }
-
 
 /* =========================================
    CHAT APPEND
@@ -785,109 +1011,305 @@ function openSend() {
    VOICE
 ========================================= */
 
-function openVoice() {
+function openAnalyzer() {
 
   openModal(`
 
     <div class="module-label">
-      VOICE INTERFACE
+      RAI NEURAL DIAGNOSTIC
     </div>
 
-    <h2>RAI VOICE</h2>
+    <h2>RAI ANALYZER</h2>
 
-    <div
-      class="voice-core"
-      id="voiceCore">
-      🎙️
+    <div class="analyzer-panel">
+
+      <div class="analyzer-status">
+        ANALYZER CORE // READY
+      </div>
+
+      <textarea
+        id="analyzerInput"
+        class="module-textarea"
+        placeholder="Tempel kode, error, log, teks, konfigurasi, atau masalah di sini..."></textarea>
+
+      <div class="analyzer-modes">
+
+        <button class="module-button analyzer-mode active"
+          data-mode="analyze">
+          <span class="mode-check">✓</span>
+          ANALYZE
+        </button>
+
+        <button class="module-button analyzer-mode"
+          data-mode="bug">
+          <span class="mode-check">✓</span>
+          FIND BUG
+        </button>
+
+        <button class="module-button analyzer-mode"
+          data-mode="optimize">
+          <span class="mode-check">✓</span>
+          OPTIMIZE
+        </button>
+
+        <button class="module-button analyzer-mode"
+          data-mode="explain">
+          <span class="mode-check">✓</span>
+          EXPLAIN
+        </button>
+
+      </div>
+
+      <button
+        id="analyzerRun"
+        class="module-button">
+        RUN ANALYSIS →
+      </button>
+
+      <div
+        id="analyzerResult"
+        class="result-box">
+        RAI ANALYZER READY.
+      </div>
+
     </div>
-
-    <p id="voiceStatus">
-      Tekan tombol untuk mulai mendengarkan.
-    </p>
-
-    <button
-      id="voiceButton"
-      class="module-button">
-      START LISTENING
-    </button>
-
-    <textarea
-      id="voiceResult"
-      class="module-textarea"
-      placeholder="Hasil suara..."></textarea>
 
   `);
 
-  const SpeechRecognition =
-    window.SpeechRecognition ||
-    window.webkitSpeechRecognition;
+  const input = $("analyzerInput");
+  const run = $("analyzerRun");
+  const output = $("analyzerResult");
 
-  if (!SpeechRecognition) {
+  const modes =
+    document.querySelectorAll(".analyzer-mode");
 
-    $("voiceStatus").textContent =
-      "Browser ini tidak mendukung Speech Recognition.";
+  if (!input || !run || !output) return;
 
-    return;
+  let selectedMode = "analyze";
+
+  function updateModeButtons() {
+
+    modes.forEach(button => {
+
+      const selected =
+        button.dataset.mode === selectedMode;
+
+      button.classList.toggle(
+        "active",
+        selected
+      );
+
+      const check =
+        button.querySelector(".mode-check");
+
+      if (check) {
+        check.textContent =
+          selected ? "✓" : "";
+      }
+    });
   }
 
-  const recognition =
-    new SpeechRecognition();
+  updateModeButtons();
 
-  recognition.lang =
-    "id-ID";
+  modes.forEach(button => {
 
-  recognition.interimResults =
-    true;
+    button.addEventListener(
+      "click",
+      () => {
 
-  $("voiceButton").addEventListener(
+        selectedMode =
+          button.dataset.mode ||
+          "analyze";
+
+        updateModeButtons();
+
+      }
+    );
+
+  });
+
+  run.addEventListener(
     "click",
-    () => {
+    async () => {
 
-      $("voiceStatus").textContent =
-        "LISTENING...";
+      const value =
+        input.value.trim();
 
-      $("voiceCore")
-        .classList
-        .add("listening");
+      if (!value) {
 
-      try {
-        recognition.start();
-      } catch {}
-    }
-  );
+        output.textContent =
+          "Masukkan sesuatu untuk dianalisis.";
 
-  recognition.onresult =
-    e => {
-
-      let text = "";
-
-      for (
-        let i = e.resultIndex;
-        i < e.results.length;
-        i++
-      ) {
-
-        text +=
-          e.results[i][0]
-            .transcript;
+        return;
       }
 
-      $("voiceResult").value =
-        text;
-    };
+      const instructions = {
 
-  recognition.onend =
-    () => {
+        analyze:
+          "Analisis input berikut secara menyeluruh. Jelaskan masalah, struktur, dan poin pentingnya.",
 
-      $("voiceStatus").textContent =
-        "VOICE CAPTURE COMPLETE";
+        bug:
+          "Cari bug, error, kelemahan logika, atau masalah potensial. Jelaskan penyebab dan perbaikannya.",
 
-      $("voiceCore")
-        .classList
-        .remove("listening");
-    };
+        optimize:
+          "Cari bagian yang bisa dioptimalkan. Berikan perbaikan konkret dan aman.",
+
+        explain:
+          "Jelaskan input berikut dengan bahasa sederhana tetapi tetap teknis dan akurat."
+
+      };
+
+      const prompt =
+`${instructions[selectedMode]}
+
+Kamu adalah RAI ANALYZER dari RAI SUPRAME.
+
+PENTING:
+- Gunakan hanya informasi dari input.
+- Jangan mengarang.
+- Jika input adalah kode, gunakan format kode saat memberikan perbaikan.
+- Jawab langsung dan terstruktur.
+
+INPUT:
+${value}`;
+
+      run.disabled = true;
+      run.textContent = "ANALYZING...";
+      output.textContent = "";
+
+      try {
+
+        const res =
+          await fetch(
+            "/api/chat",
+            {
+              method: "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body: JSON.stringify({
+                message: prompt
+              })
+            }
+          );
+
+        if (!res.ok) {
+
+          const errorData =
+            await res.json()
+              .catch(() => ({}));
+
+          throw new Error(
+            errorData.error ||
+            "ANALYZER ERROR"
+          );
+        }
+
+        if (!res.body) {
+          throw new Error(
+            "STREAM TIDAK TERSEDIA"
+          );
+        }
+
+        const reader =
+          res.body.getReader();
+
+        const decoder =
+          new TextDecoder();
+
+        let buffer = "";
+        let fullReply = "";
+
+        while (true) {
+
+          const { value, done } =
+            await reader.read();
+
+          if (done) break;
+
+          buffer += decoder.decode(
+            value,
+            { stream: true }
+          );
+
+          const lines =
+            buffer.split("\n");
+
+          buffer =
+            lines.pop() || "";
+
+          for (const line of lines) {
+
+            if (!line.trim()) continue;
+
+            try {
+
+              const data =
+                JSON.parse(line);
+
+              if (data.type === "text") {
+
+                fullReply +=
+                  data.text || "";
+
+                output.textContent =
+                  fullReply;
+              }
+
+              if (data.type === "error") {
+                throw new Error(
+                  data.error ||
+                  "STREAM ERROR"
+                );
+              }
+
+            } catch (e) {
+
+              if (
+                e instanceof SyntaxError
+              ) {
+                continue;
+              }
+
+              throw e;
+            }
+          }
+        }
+
+        if (!fullReply.trim()) {
+
+          output.textContent =
+            "RAI menerima respons kosong.";
+        }
+
+        run.textContent =
+          "RUN ANALYSIS →";
+
+      } catch (error) {
+
+        console.error(
+          "RAI ANALYZER:",
+          error
+        );
+
+        output.textContent =
+          "ANALYZER ERROR // " +
+          error.message;
+
+        run.textContent =
+          "TRY AGAIN →";
+
+      } finally {
+
+        run.disabled = false;
+
+      }
+    }
+  );
 }
-
 
 /* =========================================
    FILE
@@ -901,12 +1323,22 @@ function openFile() {
       DOCUMENT INTELLIGENCE
     </div>
 
-    <h2>RAI FILE</h2>
+    <h2>RAI FILE PRO</h2>
+
+    <div class="file-pro-info">
+      MAXIMUM FILE SIZE: <b>50 MB</b>
+    </div>
 
     <input
       id="fileInput"
       type="file"
       class="module-input">
+
+    <div
+      id="fileMeta"
+      class="file-meta">
+      NO FILE SELECTED
+    </div>
 
     <button
       id="fileAnalyze"
@@ -917,81 +1349,174 @@ function openFile() {
     <div
       id="fileResult"
       class="result-box">
-      Select a text-based file first.
+      Pilih file untuk memulai analisis.
     </div>
 
   `);
 
-  $("fileAnalyze").addEventListener(
+  const input =
+    $("fileInput");
+
+  const analyze =
+    $("fileAnalyze");
+
+  const meta =
+    $("fileMeta");
+
+  const result =
+    $("fileResult");
+
+  if (!input || !analyze || !result) {
+    return;
+  }
+
+  input.addEventListener(
+    "change",
+    () => {
+
+      const file =
+        input.files[0];
+
+      if (!file) {
+
+        meta.textContent =
+          "NO FILE SELECTED";
+
+        return;
+      }
+
+      const sizeMB =
+        file.size /
+        (1024 * 1024);
+
+      meta.textContent =
+        `${file.name} • ` +
+        `${sizeMB.toFixed(2)} MB`;
+
+      if (sizeMB > 50) {
+
+        meta.textContent +=
+          " • FILE TOO LARGE";
+
+        analyze.disabled = true;
+
+        result.textContent =
+          "File terlalu besar. Maksimal 50 MB.";
+
+        return;
+      }
+
+      analyze.disabled = false;
+
+      result.textContent =
+        "READY FOR RAI ANALYSIS";
+    }
+  );
+
+  analyze.addEventListener(
     "click",
     async () => {
 
       const file =
-        $("fileInput")
-          .files[0];
+        input.files[0];
 
       if (!file) {
 
-        $("fileResult").textContent =
+        result.textContent =
           "Pilih file terlebih dahulu.";
 
         return;
       }
 
-      const text =
-        await file.text();
+      if (
+        file.size >
+        50 * 1024 * 1024
+      ) {
 
-      if (text.length > 50000) {
-
-        $("fileResult").textContent =
-          "File terlalu besar. Maksimal 50KB.";
+        result.textContent =
+          "File terlalu besar. Maksimal 50 MB.";
 
         return;
       }
 
-      $("fileResult").textContent =
-        "ANALYZING...";
+      const formData =
+        new FormData();
+
+      formData.append(
+        "file",
+        file
+      );
+
+      analyze.disabled = true;
+
+      analyze.textContent =
+        "UPLOADING TO RAI...";
+
+      result.textContent =
+        "RAI FILE CORE // UPLOADING...";
 
       try {
 
         const res =
           await fetch(
-            "/api/chat",
+            "/api/file-analyze",
             {
               method: "POST",
-
-              headers: {
-                "Content-Type": "application/json"
-              },
-
-              body: JSON.stringify({
-                message:
-                  `Analisis file berikut dan berikan ringkasan:
-
-${text}`
-              })
+              body: formData
             }
           );
 
         const data =
-          await res.json();
+          await res.json()
+            .catch(() => ({}));
 
-        await typeResult(
-          $("fileResult"),
-          data.reply ||
-          data.error ||
-          "No response"
+        if (!res.ok) {
+
+          throw new Error(
+            data.error ||
+            "FILE ANALYSIS FAILED"
+          );
+        }
+
+        analyze.textContent =
+          "ANALYSIS COMPLETE ✓";
+
+        const info =
+          data.file
+            ? `FILE: ${data.file.name}\n` +
+              `SIZE: ${(data.file.size / (1024 * 1024)).toFixed(2)} MB\n` +
+              `TYPE: ${data.file.mimeType}\n\n`
+            : "";
+
+        result.textContent =
+          info +
+          (
+            data.reply ||
+            "No response"
+          );
+
+      } catch (error) {
+
+        console.error(
+          "RAI FILE:",
+          error
         );
 
-      } catch {
+        result.textContent =
+          "FILE ERROR // " +
+          error.message;
 
-        $("fileResult").textContent =
-          "CONNECTION FAILED";
+        analyze.textContent =
+          "TRY AGAIN →";
+
+      } finally {
+
+        analyze.disabled =
+          false;
       }
     }
   );
 }
-
 
 /* =========================================
    SEARCH
@@ -1157,50 +1682,305 @@ function openCreate() {
   openModal(`
 
     <div class="module-label">
-      CREATIVE ENGINE
+      CREATIVE ENGINE // SUPRAME
     </div>
 
-    <h2>RAI CREATE</h2>
+    <h2>RAI CREATIVE</h2>
+
+    <div class="creative-modes">
+
+      <button class="module-button creative-mode active"
+        data-mode="image">
+        <span class="creative-check">✓</span>
+        🖼️ CREATE IMAGE
+      </button>
+
+      <button class="module-button creative-mode"
+        data-mode="idea">
+        <span class="creative-check"></span>
+        💡 CREATE IDEA
+      </button>
+
+      <button class="module-button creative-mode"
+        data-mode="text">
+        <span class="creative-check"></span>
+        ✍️ CREATE TEXT
+      </button>
+
+    </div>
+
+    <div id="creativeModeInfo"
+      class="creative-mode-info">
+      IMAGE CREATOR // POSTER • ART • DESIGN
+    </div>
 
     <textarea
       id="createInput"
       class="module-textarea"
-      placeholder="Contoh: buat ide konten TikTok tentang AI..."></textarea>
+      placeholder="Contoh: Buat poster futuristik RAI SUPRAME..."></textarea>
 
     <button
       id="createButton"
       class="module-button">
-      CREATE WITH RAI →
+      CREATE IMAGE →
     </button>
 
     <div
       id="createResult"
       class="result-box">
-      Creative engine ready.
+      RAI CREATIVE ENGINE READY.
     </div>
 
   `);
 
-  $("createButton").onclick =
+  const input =
+    $("createInput");
+
+  const button =
+    $("createButton");
+
+  const result =
+    $("createResult");
+
+  const info =
+    $("creativeModeInfo");
+
+  const modes =
+    document.querySelectorAll(
+      ".creative-mode"
+    );
+
+  let selectedMode = "image";
+
+  const modeData = {
+
+    image: {
+      info:
+        "IMAGE CREATOR // POSTER • ART • DESIGN",
+
+      placeholder:
+        "Contoh: Poster futuristik RAI SUPRAME, tema cyber AI...",
+
+      button:
+        "CREATE IMAGE →"
+    },
+
+    idea: {
+      info:
+        "IDEA ENGINE // CONCEPT • CONTENT • PROJECT",
+
+      placeholder:
+        "Contoh: Berikan 5 ide konten AI yang menarik...",
+
+      button:
+        "CREATE IDEA →"
+    },
+
+    text: {
+      info:
+        "TEXT ENGINE // CAPTION • SCRIPT • COPYWRITING",
+
+      placeholder:
+        "Contoh: Buat caption promosi RAI SUPRAME...",
+
+      button:
+        "CREATE TEXT →"
+    }
+
+  };
+
+  function updateMode() {
+
+    modes.forEach(mode => {
+
+      const selected =
+        mode.dataset.mode === selectedMode;
+
+      mode.classList.toggle(
+        "active",
+        selected
+      );
+
+      const check =
+        mode.querySelector(
+          ".creative-check"
+        );
+
+      if (check) {
+        check.textContent =
+          selected ? "✓" : "";
+      }
+
+    });
+
+    const config =
+      modeData[selectedMode];
+
+    info.textContent =
+      config.info;
+
+    input.placeholder =
+      config.placeholder;
+
+    button.textContent =
+      config.button;
+
+    result.textContent =
+      "RAI CREATIVE // READY";
+  }
+
+  modes.forEach(mode => {
+
+    mode.addEventListener(
+      "click",
+      () => {
+
+        selectedMode =
+          mode.dataset.mode;
+
+        updateMode();
+
+      }
+    );
+
+  });
+
+  updateMode();
+
+
+  button.addEventListener(
+    "click",
     async () => {
 
       const prompt =
-        $("createInput")
-          .value
-          .trim();
+        input.value.trim();
 
-      if (!prompt) return;
+      if (!prompt) {
 
-      const button =
-        $("createButton");
+        result.textContent =
+          "Masukkan deskripsi terlebih dahulu.";
 
-      button.disabled =
-        true;
+        return;
+      }
 
-      button.textContent =
-        "CREATING...";
+      button.disabled = true;
+      button.textContent = "GENERATING...";
+      result.textContent = "RAI CREATIVE // PROCESSING...";
 
       try {
+
+        /* =========================
+           IMAGE
+        ========================= */
+
+        if (selectedMode === "image") {
+
+          const res =
+            await fetch(
+              "/api/generate-image",
+              {
+                method: "POST",
+
+                headers: {
+                  "Content-Type":
+                    "application/json"
+                },
+
+                body: JSON.stringify({
+                  prompt
+                })
+              }
+            );
+
+          const data =
+            await res.json();
+
+          if (!res.ok) {
+            throw new Error(
+              data.error ||
+              "IMAGE GENERATION FAILED"
+            );
+          }
+
+          if (!data.image) {
+            throw new Error(
+              "RAI tidak menerima URL gambar."
+            );
+          }
+
+          result.innerHTML = "";
+
+          const image =
+            document.createElement("img");
+
+          image.src = data.image;
+
+          image.alt =
+            "RAI GENERATED IMAGE";
+
+          image.className =
+            "rai-generated-image";
+
+          image.loading =
+            "lazy";
+
+          result.appendChild(image);
+
+          const save =
+            document.createElement("button");
+
+          save.className =
+            "module-button";
+
+          save.textContent =
+            "SAVE IMAGE ↓";
+
+          save.style.marginTop =
+            "12px";
+
+          save.onclick = () => {
+
+            const link =
+              document.createElement("a");
+
+            link.href =
+              image.src;
+
+            link.download =
+              "RAI-CREATIVE.png";
+
+            link.click();
+
+          };
+
+          result.appendChild(save);
+
+          return;
+        }
+
+
+        /* =========================
+           IDEA / TEXT
+        ========================= */
+
+        const instruction =
+          selectedMode === "idea"
+
+            ? `Kamu adalah RAI CREATIVE.
+
+Buat beberapa ide kreatif yang menarik berdasarkan permintaan pengguna.
+Berikan judul dan penjelasan singkat untuk setiap ide.
+
+Permintaan:
+${prompt}`
+
+            : `Kamu adalah RAI CREATIVE.
+
+Buat tulisan berdasarkan permintaan pengguna.
+Hasil harus natural, menarik, dan siap digunakan.
+
+Permintaan:
+${prompt}`;
 
         const res =
           await fetch(
@@ -1209,43 +1989,128 @@ function openCreate() {
               method: "POST",
 
               headers: {
-                "Content-Type": "application/json"
+                "Content-Type":
+                  "application/json"
               },
 
               body: JSON.stringify({
-                message:
-                  "Bantu saya membuat konten kreatif berikut:\n" +
-                  prompt
+                message: instruction
               })
             }
           );
 
-        const data =
-          await res.json();
+        if (!res.ok) {
 
-        await typeResult(
-          $("createResult"),
-          data.reply ||
-          data.error ||
-          "No response"
+          const data =
+            await res.json()
+              .catch(() => ({}));
+
+          throw new Error(
+            data.error ||
+            "CREATIVE ERROR"
+          );
+        }
+
+        if (!res.body) {
+          throw new Error("STREAM TIDAK TERSEDIA");
+        }
+
+        const reader =
+          res.body.getReader();
+
+        const decoder =
+          new TextDecoder();
+
+        let buffer = "";
+        let fullReply = "";
+
+        while (true) {
+
+          const { value, done } =
+            await reader.read();
+
+          if (done) break;
+
+          buffer += decoder.decode(
+            value,
+            { stream: true }
+          );
+
+          const lines =
+            buffer.split("\n");
+
+          buffer =
+            lines.pop() || "";
+
+          for (const line of lines) {
+
+            if (!line.trim()) continue;
+
+            try {
+
+              const data =
+                JSON.parse(line);
+
+              if (data.type === "text") {
+
+                fullReply +=
+                  data.text || "";
+
+                result.textContent =
+                  fullReply;
+              }
+
+              if (data.type === "error") {
+
+                throw new Error(
+                  data.error ||
+                  "STREAM ERROR"
+                );
+              }
+
+            } catch (e) {
+
+              if (
+                e instanceof SyntaxError
+              ) {
+                continue;
+              }
+
+              throw e;
+            }
+          }
+        }
+
+        if (!fullReply.trim()) {
+
+          result.textContent =
+            "RAI menerima respons kosong.";
+        }
+
+      } catch (error) {
+
+        console.error(
+          "RAI CREATIVE:",
+          error
         );
 
-      } catch {
-
-        $("createResult").textContent =
-          "CONNECTION FAILED";
+        result.textContent =
+          "CREATIVE ERROR // " +
+          error.message;
 
       } finally {
 
-        button.disabled =
-          false;
+        button.disabled = false;
 
         button.textContent =
-          "CREATE WITH RAI →";
-      }
-    };
-}
+          modeData[selectedMode].button;
 
+      }
+
+    }
+  );
+
+}
 
 /* =========================================
    MEMORY
@@ -1405,8 +2270,8 @@ function openCommand() {
         🧠 OPEN AI CHAT
       </button>
 
-      <button data-command="voice">
-        🎙️ OPEN VOICE
+      <button data-command="analyzer">
+        🧠 OPEN ANALYZER
       </button>
 
       <button data-command="send">
@@ -1612,35 +2477,730 @@ function escapeHTML(text) {
     );
 }
 
-/* ================================
-   RAI SUPRAME BOOT FAILSAFE
-================================ */
+/* =========================================
+   RAI SYSTEM STATUS
+========================================= */
 
-(function () {
-  function finishBoot() {
-    const boot = document.getElementById("boot");
+(function initRAISystemStatus() {
 
-    if (!boot) return;
+  const battery =
+    document.getElementById("batteryStatus");
 
-    boot.classList.add("hide");
+  const network =
+    document.getElementById("networkStatus");
 
-    setTimeout(function () {
-      boot.style.display = "none";
+  const temperature =
+    document.getElementById("temperatureStatus");
 
-      const login = document.getElementById("loginScreen");
-      if (login) {
-        login.style.display = "grid";
-        login.style.visibility = "visible";
-        login.style.opacity = "1";
-      }
-    }, 900);
+  if (!battery || !network || !temperature) {
+    return;
   }
 
-  // Beri waktu animasi boot berjalan
-  setTimeout(finishBoot, 3000);
+  /* BATTERY */
 
-  // Kalau halaman sudah selesai dimuat
-  window.addEventListener("load", function () {
-    setTimeout(finishBoot, 1000);
-  });
+  async function updateBattery() {
+
+    try {
+
+      if (!navigator.getBattery) {
+        battery.textContent = "--%";
+        return;
+      }
+
+      const manager =
+        await navigator.getBattery();
+
+      function render() {
+
+        const percent =
+          Math.round(
+            manager.level * 100
+          );
+
+        battery.textContent =
+          `${percent}%`;
+
+        battery.parentElement
+          ?.classList.toggle(
+            "charging",
+            manager.charging
+          );
+      }
+
+      render();
+
+      manager.addEventListener(
+        "levelchange",
+        render
+      );
+
+      manager.addEventListener(
+        "chargingchange",
+        render
+      );
+
+    } catch {
+
+      battery.textContent = "--%";
+
+    }
+  }
+
+
+  /* NETWORK */
+
+  function updateNetwork() {
+
+    if (!navigator.onLine) {
+
+      network.textContent =
+        "OFFLINE";
+
+      return;
+    }
+
+    const connection =
+      navigator.connection ||
+      navigator.mozConnection ||
+      navigator.webkitConnection;
+
+    if (!connection) {
+
+      network.textContent =
+        "ONLINE";
+
+      return;
+    }
+
+    const type =
+      connection.type;
+
+    if (type === "wifi") {
+
+      network.textContent =
+        "WIFI";
+
+    } else if (
+      type === "cellular"
+    ) {
+
+      network.textContent =
+        "MOBILE DATA";
+
+    } else if (
+      connection.effectiveType
+    ) {
+
+      network.textContent =
+        connection.effectiveType
+          .toUpperCase();
+
+    } else {
+
+      network.textContent =
+        "ONLINE";
+    }
+  }
+
+
+  /* TEMPERATURE */
+
+  function updateTemperature() {
+
+    /*
+      Browser tidak menyediakan
+      API standar untuk suhu HP.
+      Jangan menampilkan angka palsu.
+    */
+
+    if ("temperature" in navigator) {
+
+      try {
+
+        const value =
+          navigator.temperature;
+
+        if (
+          typeof value === "number" &&
+          Number.isFinite(value)
+        ) {
+
+          temperature.textContent =
+            `${Math.round(value)}°C`;
+
+          return;
+        }
+
+      } catch {}
+    }
+
+    temperature.textContent =
+      "--°C";
+  }
+
+
+  window.addEventListener(
+    "online",
+    updateNetwork
+  );
+
+  window.addEventListener(
+    "offline",
+    updateNetwork
+  );
+
+  updateBattery();
+  updateNetwork();
+  updateTemperature();
+
+  setInterval(
+    updateNetwork,
+    3000
+  );
+
+  setInterval(
+    updateTemperature,
+    5000
+  );
+
+})();
+
+
+
+/* =========================================
+   RAI MUSIC CORE
+   MAX 3 LOCAL SONGS
+   PERSISTENT STORAGE — INDEXEDDB
+========================================= */
+
+(() => {
+  const musicButton = document.getElementById("musicButton");
+  const musicPanel = document.getElementById("musicPanel");
+  const musicClose = document.getElementById("musicClose");
+  const musicInput = document.getElementById("musicInput");
+  const musicSlots = document.getElementById("musicSlots");
+  const musicPlay = document.getElementById("musicPlay");
+  const musicPrev = document.getElementById("musicPrev");
+  const musicNext = document.getElementById("musicNext");
+  const musicVolume = document.getElementById("musicVolume");
+  const audio = document.getElementById("raiAudio");
+
+  if (!musicButton || !musicPanel || !audio) return;
+
+  const MAX_SONGS = 3;
+  const DB_NAME = "RAI_MUSIC_DATABASE";
+  const DB_VERSION = 1;
+  const STORE_NAME = "songs";
+
+  let db = null;
+  let songs = [];
+  let currentIndex = -1;
+
+  audio.volume = 0.2;
+
+  /* =========================================
+     INDEXEDDB
+  ========================================= */
+
+  function openMusicDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = event => {
+        const database = event.target.result;
+
+        if (!database.objectStoreNames.contains(STORE_NAME)) {
+          database.createObjectStore(STORE_NAME, {
+            keyPath: "id",
+            autoIncrement: true
+          });
+        }
+      };
+
+      request.onsuccess = event => {
+        db = event.target.result;
+        resolve(db);
+      };
+
+      request.onerror = () => {
+        console.error("RAI MUSIC DB ERROR:", request.error);
+        reject(request.error);
+      };
+    });
+  }
+
+  function dbGetAll() {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readonly");
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.getAll();
+
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function dbAdd(song) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+
+      const request = store.add({
+        name: song.name,
+        type: song.type,
+        blob: song.blob
+      });
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  function dbDelete(id) {
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(STORE_NAME, "readwrite");
+      const store = tx.objectStore(STORE_NAME);
+      const request = store.delete(id);
+
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  }
+
+  /* =========================================
+     URL MANAGEMENT
+  ========================================= */
+
+  function makeSongURL(song) {
+    if (song.url) {
+      URL.revokeObjectURL(song.url);
+    }
+
+    song.url = URL.createObjectURL(song.blob);
+    return song.url;
+  }
+
+  /* =========================================
+     ANDROID MEDIA SESSION
+  ========================================= */
+
+  function updateMediaSession(song) {
+    if (!("mediaSession" in navigator)) return;
+    if (typeof MediaMetadata === "undefined") return;
+
+    try {
+      const logo = new URL(
+        "assets/rai-logo.png",
+        window.location.href
+      ).href;
+
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: song?.name || "RAI SUPRAME",
+        artist: "RAI MUSIC",
+        album: "REPUBLIK OF AI",
+        artwork: [
+          {
+            src: logo,
+            sizes: "512x512",
+            type: "image/png"
+          },
+          {
+            src: logo,
+            sizes: "256x256",
+            type: "image/png"
+          },
+          {
+            src: logo,
+            sizes: "128x128",
+            type: "image/png"
+          }
+        ]
+      });
+    } catch (e) {
+      console.warn("RAI MEDIA SESSION:", e);
+    }
+  }
+
+  /* =========================================
+     RENDER
+  ========================================= */
+
+  function renderMusic() {
+    musicSlots.innerHTML = "";
+
+    for (let i = 0; i < MAX_SONGS; i++) {
+      const song = songs[i];
+      const slot = document.createElement("div");
+
+      slot.className =
+        "music-slot" +
+        (i === currentIndex ? " active" : "");
+
+      if (song) {
+        slot.innerHTML = `
+          <div class="music-slot-info">
+            <span class="music-slot-name"></span>
+            <span class="music-slot-meta">
+              SLOT ${i + 1} • SAVED
+            </span>
+          </div>
+
+          <button class="music-select" type="button">
+            ${i === currentIndex && !audio.paused ? "❚❚" : "▶"}
+          </button>
+
+          <button class="music-delete" type="button">
+            ×
+          </button>
+        `;
+
+        slot.querySelector(".music-slot-name").textContent =
+          song.name;
+
+        slot.querySelector(".music-select").onclick = () => {
+          if (i === currentIndex && !audio.paused) {
+            audio.pause();
+          } else {
+            playSong(i);
+          }
+
+          renderMusic();
+        };
+
+        slot.querySelector(".music-delete").onclick = () => {
+          removeSong(i);
+        };
+
+      } else {
+
+        slot.innerHTML = `
+          <div class="music-slot-info">
+            <span class="music-slot-name">EMPTY SLOT</span>
+            <span class="music-slot-meta">
+              SLOT ${i + 1}
+            </span>
+          </div>
+        `;
+      }
+
+      musicSlots.appendChild(slot);
+    }
+  }
+
+  /* =========================================
+     PLAY SONG
+  ========================================= */
+
+  async function playSong(index) {
+    const song = songs[index];
+    if (!song) return;
+
+    currentIndex = index;
+
+    makeSongURL(song);
+
+    audio.src = song.url;
+
+    updateMediaSession(song);
+
+    try {
+      await audio.play();
+
+      musicButton.classList.add("active");
+      musicPlay.textContent = "❚❚";
+
+      renderMusic();
+
+    } catch (err) {
+      console.warn("RAI MUSIC PLAY:", err);
+    }
+  }
+
+  /* =========================================
+     REMOVE SONG
+  ========================================= */
+
+  async function removeSong(index) {
+    const song = songs[index];
+    if (!song) return;
+
+    const wasCurrent = index === currentIndex;
+
+    try {
+      await dbDelete(song.id);
+    } catch (e) {
+      console.error("RAI MUSIC DELETE:", e);
+    }
+
+    if (song.url) {
+      URL.revokeObjectURL(song.url);
+    }
+
+    songs.splice(index, 1);
+
+    if (!songs.length) {
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+
+      currentIndex = -1;
+
+      musicButton.classList.remove("active");
+      musicPlay.textContent = "▶";
+
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = null;
+      }
+
+    } else if (wasCurrent) {
+
+      audio.pause();
+
+      currentIndex = Math.min(
+        index,
+        songs.length - 1
+      );
+
+      musicButton.classList.remove("active");
+      musicPlay.textContent = "▶";
+
+    } else if (index < currentIndex) {
+      currentIndex--;
+    }
+
+    renderMusic();
+  }
+
+  /* =========================================
+     MUSIC PANEL
+  ========================================= */
+
+  musicButton.onclick = () => {
+    musicPanel.classList.toggle("hidden");
+    renderMusic();
+  };
+
+  musicClose.onclick = () => {
+    musicPanel.classList.add("hidden");
+  };
+
+  /* =========================================
+     ADD MUSIC
+  ========================================= */
+
+  musicInput.onchange = async event => {
+    const files = [...event.target.files];
+
+    for (const file of files) {
+      if (songs.length >= MAX_SONGS) break;
+
+      if (!file.type.startsWith("audio/")) continue;
+
+      try {
+        const id = await dbAdd({
+          name: file.name,
+          type: file.type,
+          blob: file
+        });
+
+        songs.push({
+          id,
+          name: file.name,
+          type: file.type,
+          blob: file,
+          url: null
+        });
+
+      } catch (e) {
+        console.error("RAI MUSIC SAVE:", e);
+      }
+    }
+
+    musicInput.value = "";
+
+    renderMusic();
+  };
+
+  /* =========================================
+     MAIN PLAY BUTTON
+  ========================================= */
+
+  musicPlay.onclick = () => {
+
+    if (currentIndex < 0) {
+      if (songs.length) {
+        playSong(0);
+      }
+      return;
+    }
+
+    if (audio.paused) {
+
+      updateMediaSession(songs[currentIndex]);
+
+      audio.play().then(() => {
+        musicButton.classList.add("active");
+        musicPlay.textContent = "❚❚";
+        renderMusic();
+      }).catch(err => {
+        console.warn("RAI MUSIC RESUME:", err);
+      });
+
+    } else {
+
+      audio.pause();
+
+      musicButton.classList.remove("active");
+      musicPlay.textContent = "▶";
+
+      renderMusic();
+    }
+  };
+
+  /* =========================================
+     PREVIOUS
+  ========================================= */
+
+  musicPrev.onclick = () => {
+    if (!songs.length) return;
+
+    const next =
+      currentIndex <= 0
+        ? songs.length - 1
+        : currentIndex - 1;
+
+    playSong(next);
+  };
+
+  /* =========================================
+     NEXT
+  ========================================= */
+
+  musicNext.onclick = () => {
+    if (!songs.length) return;
+
+    const next =
+      currentIndex >= songs.length - 1
+        ? 0
+        : currentIndex + 1;
+
+    playSong(next);
+  };
+
+  /* =========================================
+     VOLUME
+  ========================================= */
+
+  musicVolume.oninput = () => {
+    audio.volume = Number(musicVolume.value);
+  };
+
+  /* =========================================
+     AUTO NEXT
+  ========================================= */
+
+  audio.onended = () => {
+    if (!songs.length) return;
+
+    const next =
+      currentIndex >= songs.length - 1
+        ? 0
+        : currentIndex + 1;
+
+    playSong(next);
+  };
+
+  audio.onpause = () => {
+    musicButton.classList.remove("active");
+    musicPlay.textContent = "▶";
+    renderMusic();
+  };
+
+  /* =========================================
+     LOAD SAVED MUSIC
+  ========================================= */
+
+  async function initMusic() {
+    try {
+      await openMusicDB();
+
+      const savedSongs = await dbGetAll();
+
+      songs = savedSongs.map(song => ({
+        id: song.id,
+        name: song.name,
+        type: song.type,
+        blob: song.blob,
+        url: null
+      }));
+
+      renderMusic();
+
+      console.log(
+        "RAI MUSIC:",
+        songs.length,
+        "lagu berhasil dimuat dari penyimpanan lokal."
+      );
+
+    } catch (e) {
+      console.error(
+        "RAI MUSIC STORAGE ERROR:",
+        e
+      );
+
+      renderMusic();
+    }
+  }
+
+  initMusic();
+
+})();
+
+/* ==========================================
+   RAI MUSIC — ANDROID MEDIA ARTWORK
+   ========================================== */
+(function () {
+    function setRAIMediaArtwork() {
+        if (!("mediaSession" in navigator) || typeof MediaMetadata === "undefined") return;
+
+        const logo = new URL("assets/rai-logo.png", window.location.href).href;
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: "RAI SUPRAME",
+            artist: "REPUBLIK OF AI",
+            album: "RAI MUSIC",
+            artwork: [
+                {
+                    src: logo,
+                    sizes: "512x512",
+                    type: "image/png"
+                },
+                {
+                    src: logo,
+                    sizes: "256x256",
+                    type: "image/png"
+                },
+                {
+                    src: logo,
+                    sizes: "128x128",
+                    type: "image/png"
+                }
+            ]
+        });
+    }
+
+    function hookAudio() {
+        document.querySelectorAll("audio").forEach(audio => {
+            audio.addEventListener("play", setRAIMediaArtwork);
+            audio.addEventListener("loadedmetadata", setRAIMediaArtwork);
+        });
+
+        setRAIMediaArtwork();
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", hookAudio);
+    } else {
+        hookAudio();
+    }
 })();
